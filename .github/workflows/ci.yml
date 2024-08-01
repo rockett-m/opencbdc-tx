@@ -50,7 +50,7 @@ jobs:
     name: Pylint
     runs-on: ubuntu-22.04
     continue-on-error: true
-    timeout-minutes: 10
+    timeout-minutes: 5
     strategy:
       matrix:
         python-version: ["3.10"]
@@ -66,6 +66,35 @@ jobs:
         run: sudo ./scripts/install-build-tools.sh
       - name: Lint with Pylint
         run: ./scripts/pylint.sh
+  shellcheck:
+    name: Shellcheck
+    runs-on: ubuntu-22.04
+    continue-on-error: true
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Shellcheck
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y shellcheck
+      - name: Lint with Shellcheck
+        run: |
+          git ls-files '*.sh' |
+          xargs -n 1 -P $(nproc) shellcheck > shellcheck-report.txt || true
+      - name: Show Shellcheck report
+        run: |
+          echo "Shellcheck report: shellcheck-report.txt"
+          cat shellcheck-report.txt
+      - name: Detect Shellcheck errors
+        run: |
+          if grep -qE "error" shellcheck-report.txt; then
+            echo "Shellcheck found errors in report: shellcheck-report.txt"
+            exit 1
+          else
+            echo "Shellcheck found no fatal errors in report: shellcheck-report.txt"
+          fi
   unit-and-integration-test:
     name: Unit and Integration Tests
     runs-on: ubuntu-22.04
@@ -84,7 +113,7 @@ jobs:
         run: ./scripts/test.sh
       - name: Shorten SHA
         id: vars
-        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
       - uses: actions/upload-artifact@v4
         if: ${{ !env.ACT }}
         name: Archive Test Results
@@ -114,4 +143,3 @@ jobs:
           name: OpenCBDC Transaction Processor docs for ${{ steps.vars.outputs.sha_short }}
           path: ./doxygen_generated/html/*
           retention-days: 7
-

@@ -50,6 +50,7 @@ CMakeFiles/
 plots/
 .deps/
 .libs/
+.cache/
 
 # Database
 blocks.dat

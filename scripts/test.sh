@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Exit script on failure.
 set -e
 
@@ -77,13 +77,13 @@ do
         -d|--build-dir)
             shift
             ARG="$1"
-            if [[ $ARG == "" || ${ARG:0:1} == "-" ]]
+            if [[ ${ARG} == "" || ${ARG:0:1} == "-" ]]
             then
                 echo -n "ERROR:  The -d flag was used, "
                 echo "but a valid build folder was not given."
                 exit 1
             fi
-            BUILD_DIR=$ARG
+            BUILD_DIR=${ARG}
             shift
             ;;
         -ni|--no-integration-tests)
@@ -120,7 +120,7 @@ then
     BUILD_DIR="${REPO_TOP_DIR}/build"
 fi
 
-if [[ ! -d "$BUILD_DIR" ]]
+if [[ ! -d "${BUILD_DIR}" ]]
 then
     echo "ERROR:  The folder '${BUILD_DIR}' was not found."
     exit 1
@@ -129,24 +129,25 @@ fi
 # If the build folder is a relative path, convert it to an absolute path
 # to avoid potential relative path errors and to improve readability
 # if the path is written to stdout.
-export BUILD_DIR=$(cd "$BUILD_DIR"; pwd)
+BUILD_DIR=$(cd "${BUILD_DIR}"; pwd)
+export BUILD_DIR
 echo "Build folder: '${BUILD_DIR}'"
 echo
 
 run_test_suite () {
-    cd "$BUILD_DIR"
+    cd "${BUILD_DIR}"
     find . -name '*.gcda' -exec rm {} \;
-    "$PWD"/"$1" "${GTEST_FLAGS[@]}"
+    "${PWD}"/"$1" "${GTEST_FLAGS[@]}"
 
-    if [[ "$MEASURE_COVERAGE" == "true" ]]
+    if [[ "${MEASURE_COVERAGE}" == "true" ]]
     then
         echo "Checking test coverage."
         LOCATION="$2"
-        rm -rf "$LOCATION"
-        mkdir -p "$LOCATION"
+        rm -rf "${LOCATION}"
+        mkdir -p "${LOCATION}"
         find . \( -name '*.gcno' -or -name '*.gcda' \) \
-            -and -not -path '*coverage*' -exec rsync -R \{\} "$LOCATION" \;
-        cd "$LOCATION"
+            -and -not -path '*coverage*' -exec rsync -R \{\} "${LOCATION}" \;
+        cd "${LOCATION}"
 
         lcov -c -i -d . -o base.info --rc lcov_branch_coverage=1
         lcov -c -d . -o test.info --rc lcov_branch_coverage=1
@@ -161,21 +162,21 @@ run_test_suite () {
     fi
 }
 
-if [[ "$RUN_UNIT_TESTS" == "true" ]]
+if [[ "${RUN_UNIT_TESTS}" == "true" ]]
 then
     echo "Running unit tests..."
     find "${REPO_TOP_DIR}"/tests/unit/ -name '*.cfg' \
-        -exec rsync \{\} "$BUILD_DIR" \;
+        -exec rsync \{\} "${BUILD_DIR}" \;
     run_test_suite "tests/unit/run_unit_tests" "unit_tests_coverage"
 else
     echo "Skipping unit tests."
 fi
 
 echo
-if [[ "$RUN_INTEGRATION_TESTS" == "true" ]]
+if [[ "${RUN_INTEGRATION_TESTS}" == "true" ]]
 then
     echo "Running integration tests..."
-    cp "${REPO_TOP_DIR}"/tests/integration/*.cfg "$BUILD_DIR"
+    cp "${REPO_TOP_DIR}"/tests/integration/*.cfg "${BUILD_DIR}"
     run_test_suite "tests/integration/run_integration_tests" \
         "integration_tests_coverage"
 else

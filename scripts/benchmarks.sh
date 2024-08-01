@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # Exit script on failure.
 set -e
 
@@ -42,13 +42,13 @@ do
         -d|--build-dir)
             shift
             ARG="$1"
-            if [[ $ARG == "" || ${ARG:0:1} == "-" ]]
+            if [[ "${ARG}" == "" || ${ARG:0:1} == "-" ]]
             then
                 echo -n "ERROR:  The -d flag was used, "
                 echo "but a valid build folder was not given."
                 exit 1
             fi
-            BUILD_DIR=$ARG
+            BUILD_DIR="${ARG}"
             shift
             ;;
         *)
@@ -69,7 +69,7 @@ then
     BUILD_DIR="${REPO_TOP_DIR}/build"
 fi
 
-if [[ ! -d "$BUILD_DIR" ]]
+if [[ ! -d "${BUILD_DIR}" ]]
 then
     echo "ERROR:  The folder '${BUILD_DIR}' was not found."
     exit 1
@@ -78,14 +78,15 @@ fi
 # If the build folder is a relative path, convert it to an absolute path
 # to avoid potential relative path errors and to improve readability
 # if the path is written to stdout.
-export BUILD_DIR=$(cd "$BUILD_DIR"; pwd)
+BUILD_DIR=$(cd "${BUILD_DIR}"; pwd)
+export BUILD_DIR
 echo "Build folder: '${BUILD_DIR}'"
 echo
 
 run_test_suite () {
-    cd "$BUILD_DIR"
+    cd "${BUILD_DIR}"
     find . -name '*.gcda' -exec rm {} \;
-    "$PWD"/"$1" "${GTEST_FLAGS[@]}"
+    "${PWD}"/"$1" "${GTEST_FLAGS[@]}"
 }
 
 run_test_suite "benchmarks/run_benchmarks"
