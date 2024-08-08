@@ -7,7 +7,7 @@ BUILD_DOCKER=${TESTRUN_BUILD_DOCKER:-1}
 
 # Make sure we have the necessary tools installed
 required_executables=(minikube docker go helm kubectl)
-for e in ${required_executables[@]}; do
+for e in "${required_executables[@]}"; do
     if ! command -v $e &> /dev/null; then
         echo "'$e' command not be found! This is required to run. Please install it."
         exit 1

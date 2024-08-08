@@ -11,7 +11,7 @@ function readAndFormatLogs() {
         return
     fi
 
-    for logfile in $(ls $logdir); do
+    for logfile in "$logdir"/*; do
         logfile_path="$logdir/$logfile"
         logfile_content=$(cat $logfile_path)
         message+="\n<details>\n<summary>$logfile</summary>\n\n\`\`\`\n$logfile_content\n\`\`\`\n</details>\n"

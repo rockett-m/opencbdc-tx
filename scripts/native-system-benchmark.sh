@@ -151,7 +151,7 @@ on_int() {
     printf 'Interrupting all components\n'
     trap '' SIGINT # avoid interrupting ourself
     for i in $PIDS; do # intentionally unquoted
-        if [[ -n "RECORD" ]]; then
+        if [[ -n "$RECORD" ]]; then
             kill -SIGINT -- "-$i"
         else
             kill -SIGINT -- "$i"
@@ -194,7 +194,7 @@ on_int() {
 
     printf 'Terminating any remaining processes\n'
     for i in $PIDS; do # intentionally unquoted
-        if [[ -n "RECORD" ]]; then
+        if [[ -n "$RECORD" ]]; then
             kill -SIGTERM -- "-$i"
         else
             kill -SIGTERM -- "$i"
@@ -253,7 +253,7 @@ run() {
     COMP=
     case "$RECORD" in
         perf)
-            $@ &> "$PROC_LOG" &
+            "$@" &> "$PROC_LOG" &
             COMP="$!"
             perf record -F 99 -a -g -o "$PNAME".perf -p "$COMP" &> "$PERF_LOG" &
             PERFS="$PERFS $!";;
@@ -261,7 +261,7 @@ run() {
             ${DBG} "$@" &> "$PROC_LOG" &
             COMP="$!";;
         *)
-            $@ &> "$PROC_LOG" &
+            "$@" &> "$PROC_LOG" &
             COMP="$!";;
     esac
 
@@ -324,7 +324,7 @@ launch() {
                         "$RT"/scripts/wait-for-it.sh -q -t 5 -h localhost -p "$ep"
                     done
                     printf 'Launched logical %s %d, replica %d [PID: %d]\n' "$1" "$id" "$node" "$PID"
-                    if [[ -n "RECORD" ]]; then
+                    if [[ -n "$RECORD" ]]; then
                         PIDS="$PIDS $(getpgid $PID)"
                     else
                         PIDS="$PIDS $PID"
@@ -337,7 +337,7 @@ launch() {
                     "$RT"/scripts/wait-for-it.sh -q -t 5 -h localhost -p "$ep"
                 done
                 printf 'Launched %s %d [PID: %d]\n' "$1" "$id" "$PID"
-                if [[ -n "RECORD" ]]; then
+                if [[ -n "$RECORD" ]]; then
                     PIDS="$PIDS $(getpgid $PID)"
                 else
                     PIDS="$PIDS $PID"

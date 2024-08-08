@@ -27,7 +27,7 @@ fi
 
 check_format_files=$(git ls-files | grep -E "tools|tests|src|cmake-tests" \
                      | grep -E "\..*pp")
-clang-format --style=file --Werror --dry-run ${check_format_files[@]}
+clang-format --style=file --Werror --dry-run "${check_format_files[@]}"
 
 if ! command -v clang-tidy &>/dev/null; then
     echo "clang-tidy does not appear to be installed"

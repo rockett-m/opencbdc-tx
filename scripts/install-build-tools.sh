@@ -17,7 +17,7 @@ fi
 
 # Supporting these versions for buildflow
 PYTHON_VERSIONS=("3.10" "3.11" "3.12")
-echo "Python3 versions supported: ${PYTHON_VERSIONS[@]}"
+echo "Python3 versions supported: ${PYTHON_VERSIONS[*]}"
 
 # check if supported version of python3 is already installed, and save the version
 PY_INSTALLED=''
